@@ -9,7 +9,7 @@ os.environ["WANDB_PROJECT"] = "gliner_finetuning"
 os.environ["WANDB_WATCH"] = "none"
 
 import json
-
+from typing import Optional
 from gliner import GLiNER
 from gliner.data_processing.collator import DataCollator
 from gliner.training import Trainer, TrainingArguments
@@ -29,15 +29,17 @@ class TrainingConfig:
     num_epochs: int
     learning_rate: float
     gradient_accumulation_steps: int
-    save_steps: int
+    save_steps: Optional[int]
 
 
 def main(config: TrainingConfig):
     seed_everything(41)
 
+    print("Running process with pid:", os.getpid())
+
     model = GLiNER.from_pretrained(
         "data/model",
-        _attn_implementation="flash_attention_2",
+        # _attn_implementation="flash_attention_2",
         max_length=2048,
     )
     print(model)
@@ -62,7 +64,7 @@ def main(config: TrainingConfig):
             / (config.batch_size * config.gradient_accumulation_steps)
         )
         // (2)
-    ) * 2
+    ) * 2 if config.save_steps is None else config.save_steps
 
     training_args = TrainingArguments(
         run_name="fine_tune_gliner_large",
@@ -88,7 +90,7 @@ def main(config: TrainingConfig):
         ddp_find_unused_parameters=True,
         load_best_model_at_end=True,
         gradient_accumulation_steps=config.gradient_accumulation_steps,
-        # logging_steps=250,
+        logging_steps=save_steps//2,
     )
 
     trainer = Trainer(
