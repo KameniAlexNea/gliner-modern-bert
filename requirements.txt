@@ -1,0 +1,13 @@
+nltk
+pandas
+numpy
+torch
+transformers[torch]
+gliner
+seqeval
+datasets
+wandb
+optimum[exporters]
+accelerate
+evaluate
+bitsandbytes
