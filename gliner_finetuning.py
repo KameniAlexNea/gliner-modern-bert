@@ -23,6 +23,7 @@ from dataclasses import dataclass
 @dataclass
 class TrainingConfig:
     train_data: str
+    model_dir: str
     test_data: str
     output_dir: str
     batch_size: int
@@ -38,7 +39,7 @@ def main(config: TrainingConfig):
     print("Running process with pid:", os.getpid())
 
     model = GLiNER.from_pretrained(
-        "data/model",
+        config.model_dir,
         # _attn_implementation="flash_attention_2",
         max_length=2048,
     )
@@ -71,7 +72,7 @@ def main(config: TrainingConfig):
         output_dir=config.output_dir,
         learning_rate=config.learning_rate,
         weight_decay=0.0001,
-        others_lr=0.5e-6,
+        others_lr=5e-6,
         others_weight_decay=0.0001,
         lr_scheduler_type="constant",  # linear cosine
         warmup_ratio=0,  # .1
@@ -112,6 +113,12 @@ if __name__ == "__main__":
 
     def parse_args():
         parser = argparse.ArgumentParser(description="Fine-tune GLiNER model")
+        parser.add_argument(
+            "--model_dir",
+            type=str,
+            default="data/models",
+            help="Path to the model directory",
+        )
         parser.add_argument(
             "--train_data",
             type=str,
@@ -162,6 +169,7 @@ if __name__ == "__main__":
     args = parse_args()
     config = TrainingConfig(
         train_data=args.train_data,
+        model_dir=args.model_dir,
         test_data=args.test_data,
         output_dir=args.output_dir,
         batch_size=args.batch_size,
