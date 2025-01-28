@@ -2,6 +2,7 @@ import os
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["WANDB_PROJECT"] = "gliner_finetuning"
 # os.environ["WANDB_LOG_MODEL"] = "true"
 os.environ["WANDB_WATCH"] = "none"
@@ -21,7 +22,7 @@ from utils import GLiNERConfigArgs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="data/configs/config.yaml")
+    parser.add_argument("--config", type=str, default="data/config/config.yaml")
     parser.add_argument("--log_dir", type=str, default="data/models/")
     parser.add_argument("--compile_model", type=bool, default=False)
     parser.add_argument("--freeze_language_model", type=bool, default=False)
