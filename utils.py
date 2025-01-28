@@ -8,6 +8,64 @@ import torch
 max_seed_value = 4294967295  # 2^32 - 1 (uint32)
 min_seed_value = 0
 
+from dataclasses import dataclass
+from typing import Optional
+
+@dataclass
+class GLiNERConfigArgs:
+    # Extra arguments
+    log_dir: str = "models/"
+
+    # Model Configuration
+    model_name: str = "answerdotai/ModernBERT-base"
+    labels_encoder: str = "BAAI/bge-small-en-v1.5"
+    name: str = "span level gliner"
+    max_width: int = 12
+    hidden_size: int = 768
+    dropout: float = 0.3
+    fine_tune: bool = True
+    subtoken_pooling: str = "first"
+    fuse_layers: bool = False
+    post_fusion_schema: str = "l2l-l2t-t2t"
+    span_mode: str = "markerV0"
+    
+    # Training Parameters
+    num_steps: int = 100000
+    train_batch_size: int = 8
+    eval_every: int = 5000
+    warmup_ratio: float = 0.05
+    scheduler_type: str = "cosine"
+    
+    # Loss Function Parameters
+    loss_alpha: float = 0.75
+    loss_gamma: int = 0
+    label_smoothing: int = 0
+    loss_reduction: str = "sum"
+    
+    # Learning Rate and Weight Decay Configuration
+    lr_encoder: float = 1e-5
+    lr_others: float = 3e-5
+    weight_decay_encoder: float = 0.1
+    weight_decay_other: float = 0.01
+    max_grad_norm: float = 10.0
+    
+    # Directory Paths
+    root_dir: str = "gliner_logs"
+    train_data: str = "data/data/train.json"
+    val_data_dir: str = "data/data/test.json"
+    
+    # Pretrained Model Configuration
+    prev_path: Optional[str] = None
+    save_total_limit: int = 3
+    
+    # Advanced Training Settings
+    size_sup: int = -1
+    max_types: int = 100
+    shuffle_types: bool = True
+    random_drop: bool = True
+    max_neg_type_ratio: int = 1
+    max_len: int = 512
+
 
 def seed_everything(
     seed: Optional[int] = None, workers: bool = False, verbose: bool = True
