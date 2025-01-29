@@ -23,7 +23,7 @@ from utils import GLiNERConfigArgs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="data/config/config.yaml")
+    parser.add_argument("--config", type=str, default="config/config.yaml")
     parser.add_argument("--log_dir", type=str, default="data/models/")
     parser.add_argument("--compile_model", type=bool, default=False)
     parser.add_argument("--freeze_language_model", type=bool, default=False)
@@ -40,19 +40,14 @@ if __name__ == "__main__":
     print("Start loading dataset...")
 
     files = glob(os.path.join(config.train_data))
-    data = [
-        json.load(open(f, "r")) for f in files
-    ]
+    data = [json.load(open(f, "r")) for f in files]
     train_data = sum(data, start=[])
 
     files = glob(os.path.join(config.val_data_dir))
-    data = [
-        json.load(open(f, "r")) for f in files
-    ]
+    data = [json.load(open(f, "r")) for f in files]
     test_data = sum(data, start=[])
 
     random.shuffle(train_data)
-    random.shuffle(test_data)
 
     print("Dataset is splitted...", len(train_data), len(test_data))
 
@@ -126,7 +121,7 @@ if __name__ == "__main__":
         use_cpu=False,
         report_to="wandb",
         bf16=True,
-        load_best_model_at_end=True
+        load_best_model_at_end=True,
     )
 
     trainer = Trainer(
