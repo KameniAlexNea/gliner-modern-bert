@@ -11,3 +11,4 @@ optimum[exporters]
 accelerate
 evaluate
 bitsandbytes
+gradio

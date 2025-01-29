@@ -33,6 +33,8 @@ class GLiNERConfigArgs:
     num_steps: int = 100000
     train_batch_size: int = 8
     eval_every: int = 5000
+    save_strategy: str = "epoch"
+    eval_strategy: str = "epoch"
     warmup_ratio: float = 0.05
     scheduler_type: str = "cosine"
     

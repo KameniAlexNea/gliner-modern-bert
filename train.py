@@ -51,6 +51,9 @@ if __name__ == "__main__":
     ]
     test_data = sum(data, start=[])
 
+    random.shuffle(train_data)
+    random.shuffle(test_data)
+
     print("Dataset is splitted...", len(train_data), len(test_data))
 
     if config.prev_path is not None:
@@ -100,6 +103,8 @@ if __name__ == "__main__":
             model.config, data_processor=model.data_processor, prepare_labels=True
         )
 
+    save_steps = int(0.5 * len(train_dataset) // config.train_batch_size)
+
     training_args = TrainingArguments(
         output_dir=config.log_dir,
         learning_rate=float(config.lr_encoder),
@@ -112,13 +117,16 @@ if __name__ == "__main__":
         per_device_eval_batch_size=config.train_batch_size,
         max_grad_norm=config.max_grad_norm,
         max_steps=config.num_steps,
-        evaluation_strategy="epoch",
-        save_steps=config.eval_every,
+        evaluation_strategy=config.eval_strategy,
+        save_strategy=config.save_strategy,
+        save_steps=save_steps,
+        logging_steps=save_steps // 2,
         save_total_limit=config.save_total_limit,
         dataloader_num_workers=8,
         use_cpu=False,
         report_to="wandb",
         bf16=True,
+        load_best_model_at_end=True
     )
 
     trainer = Trainer(
