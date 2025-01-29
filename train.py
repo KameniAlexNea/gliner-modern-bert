@@ -2,14 +2,16 @@ import os
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["WANDB_PROJECT"] = "gliner_finetuning"
 # os.environ["WANDB_LOG_MODEL"] = "true"
 os.environ["WANDB_WATCH"] = "none"
 import argparse
 import random
+from glob import glob
 import json
 
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, EarlyStoppingCallback
 import torch
 
 from gliner import GLiNERConfig, GLiNER
@@ -21,7 +23,7 @@ from utils import GLiNERConfigArgs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="data/configs/config.yaml")
+    parser.add_argument("--config", type=str, default="config/config.yaml")
     parser.add_argument("--log_dir", type=str, default="data/models/")
     parser.add_argument("--compile_model", type=bool, default=False)
     parser.add_argument("--freeze_language_model", type=bool, default=False)
@@ -35,13 +37,19 @@ if __name__ == "__main__":
     config: GLiNERConfigArgs = load_config_as_namespace(args.config)
     config.log_dir = args.log_dir
 
-    with open(config.train_data, "r") as f:
-        train_data = json.load(f)
+    print("Start loading dataset...")
 
-    with open(config.val_data_dir, "r") as f:
-        test_data = json.load(f)
+    files = glob(os.path.join(config.train_data))
+    data = [json.load(open(f, "r")) for f in files]
+    train_data = sum(data, start=[])
 
-    print("Dataset is splitted...")
+    files = glob(os.path.join(config.val_data_dir))
+    data = [json.load(open(f, "r")) for f in files]
+    test_data = sum(data, start=[])
+
+    random.shuffle(train_data)
+
+    print("Dataset is splitted...", len(train_data), len(test_data))
 
     if config.prev_path is not None:
         tokenizer = AutoTokenizer.from_pretrained(config.prev_path)
@@ -90,6 +98,8 @@ if __name__ == "__main__":
             model.config, data_processor=model.data_processor, prepare_labels=True
         )
 
+    save_steps = int(0.5 * len(train_dataset) // config.train_batch_size)
+
     training_args = TrainingArguments(
         output_dir=config.log_dir,
         learning_rate=float(config.lr_encoder),
@@ -102,13 +112,16 @@ if __name__ == "__main__":
         per_device_eval_batch_size=config.train_batch_size,
         max_grad_norm=config.max_grad_norm,
         max_steps=config.num_steps,
-        evaluation_strategy="epoch",
-        save_steps=config.eval_every,
+        evaluation_strategy=config.eval_strategy,
+        save_strategy=config.save_strategy,
+        save_steps=save_steps,
+        logging_steps=save_steps // 2,
         save_total_limit=config.save_total_limit,
         dataloader_num_workers=8,
         use_cpu=False,
         report_to="wandb",
         bf16=True,
+        load_best_model_at_end=True,
     )
 
     trainer = Trainer(
@@ -118,5 +131,6 @@ if __name__ == "__main__":
         eval_dataset=test_dataset,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        callbacks=[EarlyStoppingCallback(3)],
     )
     trainer.train()
