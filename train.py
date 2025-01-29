@@ -8,9 +8,10 @@ os.environ["WANDB_PROJECT"] = "gliner_finetuning"
 os.environ["WANDB_WATCH"] = "none"
 import argparse
 import random
+from glob import glob
 import json
 
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, EarlyStoppingCallback
 import torch
 
 from gliner import GLiNERConfig, GLiNER
@@ -36,13 +37,21 @@ if __name__ == "__main__":
     config: GLiNERConfigArgs = load_config_as_namespace(args.config)
     config.log_dir = args.log_dir
 
-    with open(config.train_data, "r") as f:
-        train_data = json.load(f)
+    print("Start loading dataset...")
 
-    with open(config.val_data_dir, "r") as f:
-        test_data = json.load(f)
+    files = glob(os.path.join(config.train_data))
+    data = [
+        json.load(open(f, "r")) for f in files
+    ]
+    train_data = sum(data, start=[])
 
-    print("Dataset is splitted...")
+    files = glob(os.path.join(config.val_data_dir))
+    data = [
+        json.load(open(f, "r")) for f in files
+    ]
+    test_data = sum(data, start=[])
+
+    print("Dataset is splitted...", len(train_data), len(test_data))
 
     if config.prev_path is not None:
         tokenizer = AutoTokenizer.from_pretrained(config.prev_path)
@@ -119,5 +128,6 @@ if __name__ == "__main__":
         eval_dataset=test_dataset,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        callbacks=[EarlyStoppingCallback(3)],
     )
     trainer.train()
