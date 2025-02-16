@@ -102,6 +102,7 @@ if __name__ == "__main__":
 
     training_args = TrainingArguments(
         output_dir=config.log_dir,
+        run_name="gliner-modern-bert",
         learning_rate=float(config.lr_encoder),
         weight_decay=float(config.weight_decay_encoder),
         others_lr=float(config.lr_others),
@@ -112,7 +113,7 @@ if __name__ == "__main__":
         per_device_eval_batch_size=config.train_batch_size,
         max_grad_norm=config.max_grad_norm,
         max_steps=config.num_steps,
-        evaluation_strategy=config.eval_strategy,
+        eval_strategy=config.eval_strategy,
         save_strategy=config.save_strategy,
         save_steps=save_steps,
         logging_steps=save_steps // 2,
@@ -129,7 +130,7 @@ if __name__ == "__main__":
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=test_dataset,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         callbacks=[EarlyStoppingCallback(3)],
     )
