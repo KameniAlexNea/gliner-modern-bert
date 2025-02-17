@@ -11,7 +11,9 @@ os.environ["WANDB_WATCH"] = "none"
 # %%
 from gliner import GLiNER
 
-model = GLiNER.from_pretrained("data/models/checkpoint-100000")
+# model = GLiNER.from_pretrained("data/models/checkpoint-100000")
+model = GLiNER.from_pretrained("urchade/gliner_medium-v2.1")
+model.cuda()
 
 # %%
 prob_min = 0.1
@@ -21,7 +23,7 @@ from glob import glob
 import json
 
 test_files = glob("data/IE_INSTRUCTIONS/NER/*/test.json")
-len(test_files)
+print(len(test_files))
 
 # %%
 file = test_files[0]
@@ -114,10 +116,13 @@ import pandas as pd
 batch_size = 16
 thr = 0.1
 
+save_folder = "data/NEREvals"
+os.makedirs(save_folder, exist_ok=True)
+
 for file in test_files:
 	all_predictions = []
 	all_expected = []
-	with open(file) as f:
+	with open(file, encoding="utf-8") as f:
 		raws: list[dict] = json.load(f)
 	file_folder = os.path.dirname(file)
 	name = os.path.basename(file_folder)
@@ -138,7 +143,7 @@ for file in test_files:
 	print(name)
 	print(pd.DataFrame(scores).mean())
 	all_predictions = [j for i in all_predictions for j in i]
-	with open(f"data/NEREvals/{name}.json", "w") as f:
+	with open(f"{save_folder}/{name}.json", "w") as f:
 		json.dump(all_predictions, f)
 	print()
 
