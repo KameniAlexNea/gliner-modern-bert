@@ -31,6 +31,7 @@ class GLiNERConfigArgs:
     
     # Training Parameters
     num_steps: int = 100000
+    num_train_epochs: int = 100000
     train_batch_size: int = 8
     eval_every: int = 5000
     save_strategy: str = "epoch"

@@ -4,7 +4,7 @@ labels_encoder: "BAAI/bge-small-en-v1.5"
 name: "span level gliner"
 max_width: 12
 hidden_size: 768
-dropout: 0.1
+dropout: 0.4
 fine_tune: true
 subtoken_pooling: first
 fuse_layers: false
@@ -12,13 +12,14 @@ post_fusion_schema: ""
 span_mode: markerV0
 
 # Training Parameters
-num_steps: 100000
-train_batch_size: 8
+# num_steps: 100000
+train_batch_size: 64
 eval_strategy: "steps"
 save_strategy: "steps"
 eval_every: 5000
 warmup_ratio: 0.05
 scheduler_type: "cosine"
+num_train_epochs: 3
 
 # loss function
 loss_alpha: 0.75
@@ -48,7 +49,7 @@ save_total_limit: 10 #maximum amount of checkpoints to save
 
 # Advanced Training Settings
 size_sup: -1
-max_types: 100
+max_types: 25
 shuffle_types: true
 random_drop: true
 max_neg_type_ratio: 1

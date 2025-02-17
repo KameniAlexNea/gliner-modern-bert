@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="config/config.yaml")
     parser.add_argument("--log_dir", type=str, default="data/models/")
-    parser.add_argument("--compile_model", type=bool, default=False)
+    parser.add_argument("--compile_model", type=bool, default=True)
     parser.add_argument("--freeze_language_model", type=bool, default=False)
     parser.add_argument("--new_data_schema", type=bool, default=False)
     args = parser.parse_args()
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         per_device_train_batch_size=config.train_batch_size,
         per_device_eval_batch_size=config.train_batch_size,
         max_grad_norm=config.max_grad_norm,
-        max_steps=config.num_steps,
+        # max_steps=config.num_steps,
         eval_strategy=config.eval_strategy,
         save_strategy=config.save_strategy,
         save_steps=save_steps,
@@ -123,6 +123,7 @@ if __name__ == "__main__":
         report_to="wandb",
         bf16=True,
         load_best_model_at_end=True,
+        num_train_epochs=config.num_train_epochs
     )
 
     trainer = Trainer(
