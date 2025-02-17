@@ -13,7 +13,7 @@ span_mode: markerV0
 
 # Training Parameters
 # num_steps: 100000
-train_batch_size: 64
+train_batch_size: 32
 eval_strategy: "steps"
 save_strategy: "steps"
 eval_every: 5000

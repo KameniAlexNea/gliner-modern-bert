@@ -6,6 +6,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["WANDB_PROJECT"] = "gliner_finetuning"
 # os.environ["WANDB_LOG_MODEL"] = "true"
 os.environ["WANDB_WATCH"] = "none"
+
 import argparse
 import random
 from glob import glob
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="config/config.yaml")
     parser.add_argument("--log_dir", type=str, default="data/models/")
-    parser.add_argument("--compile_model", type=bool, default=True)
+    parser.add_argument("--compile_model", type=bool, default=False)
     parser.add_argument("--freeze_language_model", type=bool, default=False)
     parser.add_argument("--new_data_schema", type=bool, default=False)
     args = parser.parse_args()
@@ -76,7 +77,7 @@ if __name__ == "__main__":
             )
 
     if args.compile_model:
-        torch.set_float32_matmul_precision("high")
+        torch.set_float32_matmul_precision("medium")
         model.to(device)
         model.compile_for_training()
 
@@ -98,7 +99,7 @@ if __name__ == "__main__":
             model.config, data_processor=model.data_processor, prepare_labels=True
         )
 
-    save_steps = int(0.5 * len(train_dataset) // config.train_batch_size)
+    save_steps = int(0.25 * len(train_dataset) // config.train_batch_size)
 
     training_args = TrainingArguments(
         output_dir=config.log_dir,
