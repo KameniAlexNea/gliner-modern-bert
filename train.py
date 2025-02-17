@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="config/config.yaml")
     parser.add_argument("--log_dir", type=str, default="data/models/")
-    parser.add_argument("--compile_model", type=bool, default=False)
+    parser.add_argument("--compile_model", type=bool, default=True)
     parser.add_argument("--freeze_language_model", type=bool, default=False)
     parser.add_argument("--new_data_schema", type=bool, default=False)
     args = parser.parse_args()
@@ -102,6 +102,7 @@ if __name__ == "__main__":
 
     training_args = TrainingArguments(
         output_dir=config.log_dir,
+        run_name="gliner-modern-bert",
         learning_rate=float(config.lr_encoder),
         weight_decay=float(config.weight_decay_encoder),
         others_lr=float(config.lr_others),
@@ -111,8 +112,8 @@ if __name__ == "__main__":
         per_device_train_batch_size=config.train_batch_size,
         per_device_eval_batch_size=config.train_batch_size,
         max_grad_norm=config.max_grad_norm,
-        max_steps=config.num_steps,
-        evaluation_strategy=config.eval_strategy,
+        # max_steps=config.num_steps,
+        eval_strategy=config.eval_strategy,
         save_strategy=config.save_strategy,
         save_steps=save_steps,
         logging_steps=save_steps // 2,
@@ -122,6 +123,7 @@ if __name__ == "__main__":
         report_to="wandb",
         bf16=True,
         load_best_model_at_end=True,
+        num_train_epochs=config.num_train_epochs
     )
 
     trainer = Trainer(
@@ -129,7 +131,7 @@ if __name__ == "__main__":
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=test_dataset,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         callbacks=[EarlyStoppingCallback(3)],
     )
