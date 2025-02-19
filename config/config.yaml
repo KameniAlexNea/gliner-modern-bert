@@ -1,6 +1,6 @@
 # Model Configuration
 model_name: answerdotai/ModernBERT-base # Hugging Face model
-labels_encoder: "BAAI/bge-small-en-v1.5"
+labels_encoder: "answerdotai/ModernBERT-base"
 name: "span level gliner"
 max_width: 12
 hidden_size: 768
@@ -13,13 +13,13 @@ span_mode: markerV0
 
 # Training Parameters
 # num_steps: 100000
-train_batch_size: 64
+train_batch_size: 32
 eval_strategy: "steps"
 save_strategy: "steps"
 eval_every: 5000
 warmup_ratio: 0.05
 scheduler_type: "cosine"
-num_train_epochs: 3
+num_train_epochs: 2
 
 # loss function
 loss_alpha: 0.75
@@ -49,9 +49,9 @@ save_total_limit: 10 #maximum amount of checkpoints to save
 
 # Advanced Training Settings
 size_sup: -1
-max_types: 25
+max_types: 100
 shuffle_types: true
 random_drop: true
 max_neg_type_ratio: 1
-max_len: 512
+max_len: 1024
 freeze_token_rep: false

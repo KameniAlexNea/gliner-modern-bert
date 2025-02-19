@@ -12,7 +12,7 @@ os.environ["WANDB_WATCH"] = "none"
 from gliner import GLiNER
 
 # model = GLiNER.from_pretrained("data/models/checkpoint-100000")
-model = GLiNER.from_pretrained("urchade/gliner_medium-v2.1")
+model = GLiNER.from_pretrained("data/models/checkpoint-90288")
 model.cuda()
 
 # %%
@@ -116,7 +116,7 @@ import pandas as pd
 batch_size = 16
 thr = 0.1
 
-save_folder = "data/NEREvals"
+save_folder = "data/NEREvalsLast"
 os.makedirs(save_folder, exist_ok=True)
 
 for file in test_files:
